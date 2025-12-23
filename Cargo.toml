@@ -1,0 +1,15 @@
+[package]
+name = "termlauncher"
+description = "Your app, the user's terminal, done."
+version = "0.1.0"
+edition = "2024"
+authors = ["Christopher Kaster <me@atomicptr.de>"]
+categories = ["command-line-utilities"]
+keywords = ["cli", "terminal"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/atomicptr/termlauncher"
+
+[dependencies]
+log = "0.4.29"
+which = "8.0.0"
