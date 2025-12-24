@@ -3,6 +3,8 @@ use std::{
     process::Child,
 };
 
+use log::debug;
+
 use crate::{Error, Result, Terminal};
 
 /// Configurates an application to be run
@@ -75,8 +77,8 @@ impl Application {
     /// Launch the application in an available terminal
     ///
     /// # Errors
-    ///     - No supported terminal available
-    ///     - IO Error
+    /// `Error::NoSupportedTerminalAvailable`
+    /// `Error::IOError`
     pub fn launch(&self) -> Result<Child> {
         if let Some(term) = Terminal::find_available() {
             return self.launch_with(&term);
@@ -88,10 +90,12 @@ impl Application {
     /// Launch the application with a specific terminal
     ///
     /// # Errors
-    ///     - Terminal not available
-    ///     - IO Error
+    /// `Error::TerminalNotFound`
+    /// `Error::IOError`
     pub fn launch_with(&self, terminal: &Terminal) -> Result<Child> {
         let mut cmd = terminal.build_command(self)?;
+
+        debug!("Launching: {cmd:?}");
 
         Ok(cmd.spawn()?)
     }

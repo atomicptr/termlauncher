@@ -1,6 +1,8 @@
 use termlauncher::Application;
 
 fn main() {
+    simple_logger::init_with_level(log::Level::Debug).unwrap();
+
     Application::new("ls")
         .with_arg("-la")
         .with_working_dir(&std::env::home_dir().expect("could not find home dir"))

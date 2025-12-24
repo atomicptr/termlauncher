@@ -6,3 +6,4 @@ mod terminals;
 pub use app::Application;
 pub use error::{Error, Result};
 pub use terminal::Terminal;
+pub use terminals::custom::CustomTerminal;

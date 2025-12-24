@@ -6,6 +6,7 @@ use which::which;
 
 use crate::Application;
 use crate::error::{Error, Result};
+use crate::terminals::custom::{self, CustomTerminal};
 use crate::terminals::{alacritty, foot, ghostty, kitty, st, wezterm};
 
 #[derive(Debug, Clone)]
@@ -16,6 +17,7 @@ pub enum Terminal {
     Kitty,
     ST,
     WezTerm,
+    Custom(CustomTerminal),
 }
 
 impl Terminal {
@@ -31,7 +33,7 @@ impl Terminal {
     /// Build a `std::process::Command` for the given application
     ///
     /// # Errors
-    ///     - Terminal can't be found
+    /// `Error:TerminalNotFound`
     pub fn build_command(&self, app: &Application) -> Result<Command> {
         let mut cmd = Command::new(self.executable_path()?);
 
@@ -42,25 +44,27 @@ impl Terminal {
             Terminal::Kitty => kitty::build(&mut cmd, app),
             Terminal::ST => st::build(&mut cmd, app),
             Terminal::WezTerm => wezterm::build(&mut cmd, app),
+            Terminal::Custom(term) => custom::build(term, &mut cmd, app),
         }
 
         Ok(cmd)
     }
 
-    fn executable_name(&self) -> &str {
+    fn executable_name(&self) -> String {
         match self {
-            Self::Alacritty => "alacritty",
-            Self::Foot => "foot",
-            Self::Ghostty => "ghostty",
-            Self::Kitty => "kitty",
-            Self::ST => "st",
-            Self::WezTerm => "wezterm",
+            Self::Alacritty => "alacritty".to_string(),
+            Self::Foot => "foot".to_string(),
+            Self::Ghostty => "ghostty".to_string(),
+            Self::Kitty => "kitty".to_string(),
+            Self::ST => "st".to_string(),
+            Self::WezTerm => "wezterm".to_string(),
+            Self::Custom(term) => term.executable.to_lowercase(),
         }
     }
 
     fn executable_path(&self) -> Result<PathBuf> {
         let name = self.executable_name();
-        which(name).map_err(|_| Error::TerminalNotFound(self.executable_name().to_string()))
+        which(name).map_err(|_| Error::TerminalNotFound(self.executable_name()))
     }
 
     #[must_use]

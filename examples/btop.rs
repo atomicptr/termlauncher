@@ -1,6 +1,8 @@
-use termlauncher::Application;
+use termlauncher::{Application, CustomTerminal};
 
 fn main() {
+    simple_logger::init_with_level(log::Level::Debug).unwrap();
+
     Application::new("btop")
         .with_class("dev.atomicptr.btop")
         .with_arg("--tty")
