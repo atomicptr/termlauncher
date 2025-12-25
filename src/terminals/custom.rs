@@ -20,7 +20,7 @@ fn apply_arg(cmd: &mut Command, arg: Option<&String>, value: &str) {
         if arg.ends_with('=') {
             cmd.arg(format!("{arg}{value}"));
         } else {
-            cmd.arg("{arg}");
+            cmd.arg(arg);
             cmd.arg(value);
         }
     }
