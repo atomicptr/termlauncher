@@ -47,6 +47,8 @@ impl Terminal {
             Terminal::Custom(term) => custom::build(term, &mut cmd, app),
         }
 
+        cmd.envs(app.env_vars.clone());
+
         Ok(cmd)
     }
 

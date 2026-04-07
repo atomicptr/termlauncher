@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     path::{Path, PathBuf},
     process::Child,
 };
@@ -16,6 +17,7 @@ pub struct Application {
     pub class: Option<String>,
     pub working_dir: Option<PathBuf>,
     pub hold: bool,
+    pub env_vars: HashMap<String, String>,
 }
 
 impl Application {
@@ -29,6 +31,7 @@ impl Application {
             class: None,
             working_dir: None,
             hold: false,
+            env_vars: HashMap::new(),
         }
     }
 
@@ -71,6 +74,12 @@ impl Application {
     #[must_use]
     pub fn with_hold(mut self, keep_open: bool) -> Self {
         self.hold = keep_open;
+        self
+    }
+
+    #[must_use]
+    pub fn with_env_var(mut self, key: &str, value: &str) -> Self {
+        self.env_vars.insert(key.to_string(), value.to_string());
         self
     }
 
