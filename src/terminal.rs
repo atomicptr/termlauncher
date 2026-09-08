@@ -66,7 +66,17 @@ impl Terminal {
 
     fn executable_path(&self) -> Result<PathBuf> {
         let name = self.executable_name();
-        which(name).map_err(|_| Error::TerminalNotFound(self.executable_name()))
+
+        if let Ok(path) = which(&name) {
+            return Ok(path);
+        }
+
+        #[cfg(target_os = "macos")]
+        if let Some(path) = find_macos_executable_in_app_bundle(&name) {
+            return Ok(path);
+        }
+
+        Err(Error::TerminalNotFound(name))
     }
 
     #[must_use]
@@ -114,4 +124,41 @@ impl Terminal {
 
         None
     }
+}
+
+#[cfg(target_os = "macos")]
+fn find_macos_executable_in_app_bundle(name: &str) -> Option<PathBuf> {
+    // support /Applications
+    let mut roots = vec![PathBuf::from("/Applications")];
+
+    // also support for /Users/name/Applications
+    if let Some(home) = env::home_dir() {
+        roots.push(home.join("Applications"));
+    }
+
+    // for all application roots
+    for root in roots {
+        let Ok(entries) = std::fs::read_dir(&root) else {
+            continue;
+        };
+
+        for entry in entries.flatten() {
+            let path = entry.path();
+
+            // if its not an "*.app" continue
+            if path.extension().is_none_or(|e| e != "app") {
+                continue;
+            }
+
+            let candidate = path.join("Contents/MacOS").join(name);
+
+            // if the .app bundle contains the file we're looking for
+            if candidate.is_file() {
+                debug!("Found macOS bundle executable: {}", candidate.display());
+                return Some(candidate);
+            }
+        }
+    }
+
+    None
 }
